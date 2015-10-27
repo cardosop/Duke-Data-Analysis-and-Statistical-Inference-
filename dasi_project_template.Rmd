@@ -1,0 +1,311 @@
+---
+title: "There is a relation between race and income?"
+date: "30/10/2015"
+output:
+  html_document:
+    theme: cerulean
+---
+
+<!-- For more info on RMarkdown see http://rmarkdown.rstudio.com/ -->
+
+<!-- Enter the code required to load your data in the space below. The data will be loaded but the line of code won't show up in your write up (echo=FALSE) in order to save space-->
+```{r echo=FALSE}
+load(url("http://bit.ly/dasi_gss_data"))
+
+```
+```
+load(url("http://bit.ly/dasi_gss_data"))
+
+```
+
+<!-- In the remainder of the document, add R code chunks as needed -->
+
+### Introduction:
+
+The project aims to study the relationship between the race of the respondents and their income. Does race influences in how much money a person makes? And also if in case there is a relationship between race and income, how is this relationship.
+
+
+The source of research data is the General Social Survey (GSS), which is a sociological survey applied on US residents in order to collect data on demographic characteristics and behavior.By studying the survey, one could learn some interesting insights of American society.
+
+
+### Data:
+
+The General Social Survey (GSS) data is composed of 57,061 cases (rows) and 114 variables (columns) provide by this course. The GSS data was collected by computer-assisted personal interview (CAPI), face-to-face interview and telephone interview of adults (18+) in randomly selected households.. Each row corresponds to a person surveyed. Of this data frame only two of those 114 variables will be used, these variables are: declared race (race, categorical) and the total family income in constant US dollars of the respondent (coninc, continuous numerical).
+
+gss$race:  categorical
+Race of respondent
+
+What race do you consider yourself?
+VALUE	LABEL
+NA	IAP
+1	WHITE
+2	BLACK
+3	OTHER
+
+Data type: numeric Missing-data code: 0 Record/column: 1/17
+
+********************************************************************
+
+gss$coninc:  continuous numerical
+
+Family income in constant US dollars
+
+Inflation-adjusted family income.
+VALUE 	LABEL
+NA 	IAP
+NA 	DONT KNOW
+NA 	NA
+
+Data type: numeric Missing-data codes: 0,999999,999998 Record/columns: 1/72-77
+
+This report is the result of an observational study, because it can establish only correlation between the variables examined and not causation. It`s opposed to an experiment, only correlations can be found. However, any strong association between income and vote would be useful to infer. The generalization could be applied for all the US population, because the GSS data way gather using random sample from the US population. The bias could be present on the respondent. Its not possible establish causality between the variables, and also for this been an observational study its not possible exists any casual relation between variables.
+
+The data cut used in this research is first made a cut in the original frame data by selecting to dt2, the columns income and race. And in a second step the lines with NA values are removed from the data frame forming a subset. As is presented below:
+
+```
+dt2<-gss[,c("coninc","race")]
+dt <- subset(dt2, race != "NA")
+dt <- subset(dt, coninc != "NA")
+```
+```{r echo=FALSE}
+dt2<-gss[,c("coninc","race")]
+dt <- subset(dt2, race != "NA")
+dt <- subset(dt, coninc != "NA")
+```
+
+After the preparation of the data frame, can be noted that of the 57.061 cases more than 5,000 were removed by having a NA value, during the previous step. This step which results in a data frame containing 51.232 rows and 2 columns, as can be observed with the following command:
+
+```
+str(dt)
+```
+
+Results on:
+
+```{r echo=FALSE}
+str(dt)
+```
+
+### Exploratory data analysis:
+
+We can see that the distribution of race column, which is the variable self declaration of their race, and it has a largest concentration in white.
+
+This "summary" shows the distribution in numeric format from the levels of race column:
+
+```
+summary(dt$race)
+```
+
+Results on:
+
+```{r echo=FALSE}
+summary(dt$race)
+```
+
+This pie plot presents in visual form the command summary presented above in order to facilitate understanding of representation as a percentage of the variable "race".
+
+```
+eda1<-summary(dt$race)
+pie(eda1, labels = paste(levels(dt$race), " - ", round(eda1/sum(eda1)*100, digit = 1), " %", sep=""),col = rainbow(length(levels(dt$race))), main="Race distribution in %")
+```
+
+Results on:
+
+```{r echo=FALSE}
+eda1<-summary(dt$race)
+pie(eda1, labels = paste(levels(dt$race), " - ", round(eda1/sum(eda1)*100, digit = 1), " %", sep=""),col = rainbow(length(levels(dt$race))), main="Race distribution in %")
+```
+
+On the other hand, the column "coninc" which is the family income of the respondent in US dollars. With the lower income the amount of US $ 320 and higher value as US $ 180,400, in addition, the mean is in US $ 45,210. More info can be seen below:
+
+```
+summary(dt$coninc)
+```
+
+Results on:
+
+```{r echo=FALSE}
+summary(dt$coninc)
+```
+
+We observe that the distribution for the family income is right-skewed and limited to zero on the left. Here again, both of these observations are expected as one cannot have a negative income and we expect the count of respondents to decrease as the income increases:
+
+```
+library(ggplot2)
+ggplot(dt, aes(x=coninc)) +
+    geom_histogram(binwidth=5000, colour="black", fill="blue") +
+    xlab("Income") +
+    ggtitle("Distribution of Family Income")
+```
+
+Results on:
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(dt, aes(x=coninc)) +
+    geom_histogram(binwidth=5000, colour="black", fill="blue") +
+    xlab("Income") +
+    ggtitle("Distribution of Family Income")
+```
+
+Through the use of violin and overlapping graphical representations, it can be observed a great similarity in the relationship between income and races.
+
+```
+ggplot(dt, aes(x=race, y=coninc, fill=race)) +
+    geom_violin(alpha=0.2) +
+    xlab("Race") +
+    ylab("Income") +
+    ggtitle("Family Income vs Race")
+```
+
+Results on:
+
+```{r echo=FALSE}
+ggplot(dt, aes(x=race, y=coninc, fill=race)) +
+    geom_violin(alpha=0.2) +
+    xlab("Race") +
+    ylab("Income") +
+    ggtitle("Family Income vs Race")
+```
+
+
+The overlapping distribution plots:
+
+```
+g <- ggplot(dt, aes(coninc, fill = race))
+g + geom_density (alpha = 0.3) + labs(title = "Income distributions across Races") + labs(x = "Total Family Income", y = "Density")
+```
+
+Results on:
+
+```{r echo=FALSE}
+g <- ggplot(dt, aes(coninc, fill = race))
+g + geom_density (alpha = 0.3) + labs(title = "Income distributions across Races") + labs(x = "Total Family Income", y = "Density")
+```
+
+### Inference:
+
+The study want to explore if there is a statistical significant difference between the mean family income in constant dollars of United States resident as respect to their race.
+
+State hypothesis H0 (null hypothesis): all means (µ) of each race are equal, aka. µ1=µ2=µ3 
+Alternate hypothesis HA: the average income in constant dollar varies across some (or all) groups
+
+```
+par(mfrow = c(1,3))
+qqnorm(dt$coninc[dt$race == "White"], main = "White")
+qqline(dt$coninc[dt$race == "White"])
+qqnorm(dt$coninc[dt$race == "Black"], main = "Black")
+qqline(dt$coninc[dt$race == "Black"])
+qqnorm(dt$coninc[dt$race == "Other"], main = "Other")
+qqline(dt$coninc[dt$race == "Other"])
+```
+
+Results on:
+
+```{r echo=FALSE}
+par(mfrow = c(1,3))
+qqnorm(dt$coninc[dt$race == "White"], main = "White")
+qqline(dt$coninc[dt$race == "White"])
+qqnorm(dt$coninc[dt$race == "Black"], main = "Black")
+qqline(dt$coninc[dt$race == "Black"])
+qqnorm(dt$coninc[dt$race == "Other"], main = "Other")
+qqline(dt$coninc[dt$race == "Other"])
+
+```
+
+Constant variance: we can check variability using boxplot below; total range and interquantile range of 3  race groups are roughly similar.
+
+```
+ggplot(dt, aes(x=race, y=coninc, fill=race)) +
+    geom_boxplot(alpha=0.2) +
+    xlab("Race") +
+    ylab("Family Income") +
+    ggtitle("Family Income vs Race")
+```
+
+Results on:
+
+```{r echo=FALSE}
+ggplot(dt, aes(x=race, y=coninc, fill=race)) +
+    geom_boxplot(alpha=0.2) +
+    xlab("Race") +
+    ylab("Family Income") +
+    ggtitle("Family Income vs Race")
+```
+
+Although the conditions on normality and constant variance are not fully respected, we will use ANOVA in our hypothesis test and report the uncertainty in final results.
+
+Since we are workng with categorical variables with more than 2 levels, we will use ANOVA test to check whether means across 3 groups are equal. If we can reject the null hypothesis, then results of pairwise comparison can be conducted with Bonferroni method to control Type I error.
+
+ANOVA uses F statistics, which represents a standardized ratio of variability in sample means, relative to variability within the group. The larger the observed variability, the larger F will be, and the stronger the evidence against the null hypothesis. As presented below:
+
+```
+anova(lm(coninc ~ race, data=dt))
+```
+
+Results on:
+
+```{r echo=FALSE}
+anova(lm(coninc ~ race, data=dt))
+```
+
+ANOVA reports a F statistics of 675.08 and a p-value of approximately zero. This mean that the probability of observing a F value of 675.08 or higher, if the null hypothesis is true, is very low. So we can reject the null hypothesis and say that family income in constant dollar varies statistically significant among groups.
+
+Since the null hypothesis has been rejected, we can do a pairwise comparison to find out which groups have different means. For every possible pair of groups, we use a t test statistic to confirm the null hypothesis that the means of the two groups are equal or the alternative hypothesis that they are different.
+
+To avoid the increase of Type I error (rejecting a true null hypothesis), we apply a Bonferroni correction to the p-values which are multiplied by the number of comparison. With this correction, the difference of the means has to be bigger to reject the null hypothesis.
+
+```
+pairwise.t.test(dt$coninc, dt$race, p.adj="bonferroni")
+```
+
+Results on:
+
+```{r echo=FALSE}
+pairwise.t.test(dt$coninc, dt$race, p.adj="bonferroni")
+```
+
+### Conclusion:
+
+
+After analysis of the data it may be concluded that while family income between the races being relatively similar, there is a tendency for black respondents have a family income lower than the respondents of other races.
+
+This fact can be observed in several graphs from explotatoria analyze data until the inference, through various forms of representation of information.
+
+### References:
+
+General Social Survey Cumulative File, 1972-2012 Coursera Extract. Modified for Data Analysis and Statistical Inference course (Duke University).
+
+R dataset could be downloaded at http://bit.ly/dasi_gss_data.
+
+Original data:
+Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey, 1972-2012 [Cumulative File]. ICPSR34802-v1. Storrs, CT: Roper Center for Public Opinion Research, University of Connecticut /Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributors], 2013-09-11. doi:10.3886/ICPSR34802.v1
+
+Persistent URL: http://doi.org/10.3886/ICPSR34802.v1
+
+
+General Social Survey (GSS) FAQ. URL: http://publicdata.norc.org:41000/gssbeta/faqs.html. Accessed 10/27/2015
+
+Comparing many means with ANOVA. In Diez M David, Barr D Christopher, Çetinkaya-Rundel Mine (2015), OpenIntro Statistics, Third Edition, URL: http://www.openintro.org/stat/textbook.php. Accessed 10/27/2015
+
+
+### Appendix:
+
+```
+head(dt, n=50)
+```
+
+Results on:
+
+```{r echo=FALSE}
+head(dt, n=50)
+```
+
+```
+tail(dt, n=50)
+```
+
+Results on:
+
+```{r echo=FALSE}
+tail(dt, n=50)
+```
